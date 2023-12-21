@@ -7,14 +7,26 @@ import TotalCost from "./pages/TotalCost";
 import NotFound from "./pages/NotFound";
 import { AppContext } from "./contexts/AppContext";
 import { Body } from "./styles";
+import { NewUserData, NewExpenseData, NewCostData } from "./data/data-helpers";
 
 function App() {
-  const [text, setText] = useState("my text");
+  const [userData, setUserData] = useState(NewUserData);
+  const [expenseData, setExpenseData] = useState(NewExpenseData);
+  const [costData, setCostData] = useState(NewCostData);
+
+  const ContextData = {
+    userData,
+    setUserData,
+    expenseData,
+    setExpenseData,
+    costData,
+    setCostData,
+  };
 
   return (
     <BrowserRouter>
       <Navbar />
-      <AppContext.Provider value={{ text, setText }}>
+      <AppContext.Provider value={ContextData}>
         <Body>
           <Routes>
             <Route index element={<UserManagement />} />
