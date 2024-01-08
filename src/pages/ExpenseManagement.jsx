@@ -14,23 +14,29 @@ const ExpenseManagement = () => {
   const { userData } = useContext(AppContext);
   const [open, setOpen] = useState(false);
   const [users, setUsers] = useState([]);
+  const [userId, setUserId] = useState("");
   const [currentUser, setCurrentUser] = useState("");
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const handleChange = (event) => {
     setCurrentUser(event.target.value);
+    setUserId(event.target.value.uuid);
   };
 
   useEffect(() => {
-    const usersArray = [];
-    userData.forEach((value) => {
-      usersArray.push({
-        name: `${value.firstName} ${value.lastName}`,
-        uuid: value.id,
+    if (userData.size > 0) {
+      const usersArray = [];
+      [...userData].forEach(([, value]) => {
+        usersArray.push({
+          name: `${value.firstName} ${value.lastName}`,
+          uuid: value.id,
+        });
       });
-    });
-    setUsers(usersArray);
-  }, []);
+      setUsers(usersArray);
+      setCurrentUser(usersArray[0]);
+      setUserId(usersArray[0].uuid);
+    }
+  }, [userData]);
 
   return (
     <>
@@ -45,8 +51,8 @@ const ExpenseManagement = () => {
             label="Users"
             onChange={handleChange}
           >
-            {users.map((user) => (
-              <MenuItem key={user.uuid} value={user}>
+            {users.map((user, index) => (
+              <MenuItem key={index} value={user}>
                 {user.name}
               </MenuItem>
             ))}
@@ -60,10 +66,10 @@ const ExpenseManagement = () => {
       <ExpenseModal
         open={open}
         handleClose={handleClose}
-        uuid={currentUser.uuid}
+        uuid={userId}
         isEdit={false}
       />
-      <ExpensesTable />
+      <ExpensesTable uuid={userId} />
     </>
   );
 };

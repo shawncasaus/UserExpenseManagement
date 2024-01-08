@@ -10,11 +10,11 @@ import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import { AppContext } from "../../contexts/AppContext";
-import { deleteUser } from "../../data/data-helpers";
+import { deleteUser, getExpensesTotalById } from "../../data/data-helpers";
 import UserModal from "../modals/user-modal";
 
 const UserTable = () => {
-  const { userData, setUserData } = useContext(AppContext);
+  const { expenseData, userData, setUserData } = useContext(AppContext);
   const [open, setOpen] = useState(false);
   const [modalUUID, setModalUUID] = useState("");
   const handleOpen = () => setOpen(true);
@@ -44,7 +44,9 @@ const UserTable = () => {
                   {value.firstName}
                 </TableCell>
                 <TableCell align="right">{value.lastName}</TableCell>
-                <TableCell align="right">0</TableCell>
+                <TableCell align="right">
+                  {getExpensesTotalById(expenseData, key)}
+                </TableCell>
                 <TableCell align="right">
                   <IconButton
                     aria-label="delete"

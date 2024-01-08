@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -9,24 +9,40 @@ import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditNoteIcon from "@mui/icons-material/EditNote";
+import PropTypes from "prop-types";
 import { AppContext } from "../../contexts/AppContext";
 import ExpenseModal from "../modals/expense-modal";
-import { deleteExpense } from "../../data/data-helpers";
+import { getExpensesById, deleteExpense } from "../../data/data-helpers";
 
-const UserTable = () => {
+const ExpensesTable = ({ uuid }) => {
   const { expenseData, setExpenseData } = useContext(AppContext);
   const [open, setOpen] = useState(false);
-  const [modalUUID, setModalUUID] = useState("");
+  const [expenseId, setExpenseId] = useState("");
+  const [userExpenses, setUserExpenses] = useState([]);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  useEffect(() => {
+    if (uuid) {
+      const expenses = getExpensesById(expenseData, uuid);
+      setUserExpenses(expenses);
+    }
+  }, [expenseData, uuid]);
+
+  useEffect(() => {
+    if (!open) {
+      setExpenseId("");
+    }
+  }, [open]);
 
   return (
     <>
       <ExpenseModal
         open={open}
         handleClose={handleClose}
-        uuid={modalUUID}
+        uuid={uuid}
         isEdit={true}
+        expenseId={expenseId}
       />
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -40,9 +56,9 @@ const UserTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {[...expenseData].map(([key, value]) => (
+            {userExpenses.map((value, index) => (
               <TableRow
-                key={key}
+                key={index}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
                 <TableCell align="center">{value.category}</TableCell>
@@ -52,7 +68,9 @@ const UserTable = () => {
                   <IconButton
                     aria-label="delete"
                     onClick={() => {
-                      setExpenseData([...deleteExpense(expenseData, key)]);
+                      setExpenseData(
+                        deleteExpense(expenseData, uuid, value.id)
+                      );
                     }}
                   >
                     <DeleteIcon />
@@ -62,7 +80,7 @@ const UserTable = () => {
                   <IconButton
                     aria-label="edit"
                     onClick={() => {
-                      setModalUUID(key);
+                      setExpenseId(value.id);
                       handleOpen();
                     }}
                   >
@@ -78,4 +96,8 @@ const UserTable = () => {
   );
 };
 
-export default UserTable;
+ExpensesTable.propTypes = {
+  uuid: PropTypes.string.isRequired,
+};
+
+export default ExpensesTable;

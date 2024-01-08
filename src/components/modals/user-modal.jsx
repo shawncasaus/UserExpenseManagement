@@ -7,7 +7,12 @@ import AddIcon from "@mui/icons-material/Add";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import PropTypes from "prop-types";
 import { AppContext } from "../../contexts/AppContext";
-import { addUser, getUserById, editUser } from "../../data/data-helpers";
+import {
+  addUser,
+  getUserById,
+  editUser,
+  addNewUserExpense,
+} from "../../data/data-helpers";
 import {
   ModalBoxStyle,
   FormTextBoxStyle,
@@ -15,7 +20,8 @@ import {
 } from "../../styles";
 
 const UserModal = ({ open, handleClose, uuid }) => {
-  const { userData, setUserData } = useContext(AppContext);
+  const { userData, setUserData, expenseData, setExpenseData } =
+    useContext(AppContext);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [firstNameError, setFirstNameError] = useState(false);
@@ -25,7 +31,9 @@ const UserModal = ({ open, handleClose, uuid }) => {
       if (uuid) {
         setUserData(editUser(userData, uuid, firstName, lastName));
       } else {
-        setUserData(addUser(userData, firstName, lastName));
+        const newUser = addUser(userData, firstName, lastName);
+        setUserData(newUser.updatedUsers);
+        setExpenseData(addNewUserExpense(expenseData, newUser.uuid));
       }
       handleClose();
     }

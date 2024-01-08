@@ -22,7 +22,7 @@ import {
   FormTextSubmitStyle,
 } from "../../styles";
 
-const ExpenseModal = ({ open, handleClose, uuid, isEdit }) => {
+const ExpenseModal = ({ open, handleClose, uuid, isEdit, expenseId }) => {
   const { expenseData, setExpenseData } = useContext(AppContext);
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
@@ -30,23 +30,29 @@ const ExpenseModal = ({ open, handleClose, uuid, isEdit }) => {
   const [categoryError, setCategoryError] = useState(false);
   const [descriptionError, setDescriptionError] = useState(false);
   const [amountError, aetAmountError] = useState(false);
-  const handleSubmit = () => {
+  const handleSubmitAdd = () => {
     if (category.length > 0 && description.length > 0 && amount.length > 0) {
-      if (isEdit) {
-        setExpenseData(
-          editExpense(expenseData, uuid, category, description, amount)
-        );
-        setCategory("");
-        setDescription("");
-        setAmount("");
-      } else {
-        setExpenseData(
-          addExpense(expenseData, uuid, category, description, amount)
-        );
-        setCategory("");
-        setDescription("");
-        setAmount("");
-      }
+      setExpenseData(
+        addExpense(expenseData, uuid, category, description, amount)
+      );
+      setCategory("");
+      setDescription("");
+      setAmount("");
+      handleClose();
+    }
+    setCategoryError(category.length === 0);
+    setDescriptionError(description.length === 0);
+    aetAmountError(amount === 0);
+  };
+
+  const handleSubmitEdit = () => {
+    if (category.length > 0 && description.length > 0 && amount.length > 0) {
+      setExpenseData(
+        editExpense(expenseData, uuid, expenseId, category, description, amount)
+      );
+      setCategory("");
+      setDescription("");
+      setAmount("");
       handleClose();
     }
     setCategoryError(category.length === 0);
@@ -56,14 +62,14 @@ const ExpenseModal = ({ open, handleClose, uuid, isEdit }) => {
 
   useEffect(() => {
     if (isEdit) {
-      const expense = getExpenseById(expenseData, uuid);
+      const expense = getExpenseById(expenseData, uuid, expenseId);
       if (expense) {
         setCategory(expense.category);
         setDescription(expense.description);
         setAmount(expense.amount);
       }
     }
-  }, [expenseData, isEdit, uuid]);
+  }, [expenseData, expenseId, isEdit, uuid]);
 
   return (
     <div>
@@ -122,7 +128,10 @@ const ExpenseModal = ({ open, handleClose, uuid, isEdit }) => {
             />
           </div>
           <div style={{ display: "flex", justifyContent: "center" }}>
-            <IconButton onClick={handleSubmit} sx={FormTextSubmitStyle}>
+            <IconButton
+              onClick={isEdit ? handleSubmitEdit : handleSubmitAdd}
+              sx={FormTextSubmitStyle}
+            >
               {isEdit ? "Edit expense" : "Add expense"}
               <AddIcon />
             </IconButton>
@@ -138,6 +147,7 @@ ExpenseModal.propTypes = {
   handleClose: PropTypes.func.isRequired,
   uuid: PropTypes.string.isRequired,
   isEdit: PropTypes.bool.isRequired,
+  expenseId: PropTypes.string,
 };
 
 export default ExpenseModal;
